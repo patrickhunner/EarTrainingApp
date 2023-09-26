@@ -60,6 +60,18 @@ app.get('/getSong', (req, res) => {
     });
 })
 
+app.get('/getDaily', (req, res) => {
+    db.query('SELECT * FROM songs WHERE daily_puzzle = 1', (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error retrieving song');
+        } else {
+            console.log(result);
+            res.status(200).send(result);
+        }
+    });
+});
+
 app.post('/testSaveChords', (req, res) => {
     const jsonData = req.body;
     console.log(jsonData.chords);

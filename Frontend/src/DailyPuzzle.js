@@ -7,15 +7,93 @@ import { useRoute } from '@react-navigation/native';
 import YTSearch from 'youtube-api-search';
 
 export default DailyPuzzle = ({navigation}) => {
-    const API_KEY = 'AIzaSyAknwiMsZI8obXieKGBPrC5l6FgSrxjuYo';
     const route = useRoute();
-    const { search } = route.params;
-    
+    const server = "http://localhost:3000";
+    const [playing, setPlaying] = useState(false);
+    const [song, setSong] = useState(null);
+
+
+
+    useEffect(() => {
+        axios
+          .get(server + '/getDaily', {
+          })
+          .then(response => {
+            setSong(response.data[0])
+            // setSong(response.data[0]);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }, []); 
+
+
+    const onStateChange = useCallback((state) => {
+        if (state === "ended") {
+        setPlaying(false);
+        Alert.alert("Video has finished playing!");
+        }
+    }, []);
+
+    const togglePlaying = useCallback(() => {
+        setPlaying((prev) => !prev);
+    }, []);
+
+  
+
     return (
         <View>
             <View>
-                <Text>search</Text>
+                <YoutubePlayer
+                    height={300}
+                    play={playing}
+                    videoId={song ? song.video_key : null}
+                    onChangeState={onStateChange}
+                    rel={false}
+                />
+                <Button title={playing ? "Pause" : "Play"} onPress={togglePlaying} />
+            </View>
+            <View >
+                <ScrollView style={{ width: '100%', paddingHorizontal: 10 }}>
+                    <FlatList 
+                        horizontal={true}
+                        flexWrap='wrap' 
+                        data={song ? song.chords : null}
+                        renderItem={({ item }) => (
+                            <Text style={styles.item}>{item.chord_complex_pop}</Text>
+                        )}
+                    />
+                </ScrollView>
             </View>
         </View>
     )
 }
+
+
+
+const styles = StyleSheet.create({
+    text: {
+      color: 'white',
+      fontSize: 40,
+      textAlign: 'center'
+    },
+    search: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    search_bar: {
+      flex: 4
+    },
+    search_button: {
+      flex: 1
+    },
+    chords: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    item: {
+        padding: 10,
+        margin: 5,
+        backgroundColor: '#ccc',
+    },
+  });
